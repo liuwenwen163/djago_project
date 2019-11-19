@@ -1,0 +1,14 @@
+<%!
+        from django.conf import settings
+%>
+
+${settings.TEMPLATES[0]['DIRS'][0]}
+
+<br/>
+在前端可以定义函数：
+<br/>
+<%
+    def name():
+        return 'my name is dewei'
+%>
+<input type="text" name="username" value="${name()}">
