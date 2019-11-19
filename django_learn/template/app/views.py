@@ -9,7 +9,7 @@ class Index(View):
         data = {}
         data['name'] = name
         data['array'] = range(10)
-
+        data['count'] = 20
         return render(request, self.TEMPLATE, data)
 
 
