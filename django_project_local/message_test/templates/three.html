@@ -1,0 +1,22 @@
+{% load custom %}
+{# 加载自定义的过滤器 #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% if error %}
+<h3>error: {{ error }}</h3>
+{% else %}
+    <label style="color:{{ message_type.color }}">{{ message_type.label }}</label>
+    <br>
+    {# 调用自定义的过滤器 #}
+    <span style="color:{{ message_type.color }}">{{ message|sample_check }}</span>
+    <br>
+    {# 调用深度过滤器 #}
+    <span style="color:{{ message_type.color }}">{{ message|deep_check_message }}</span>
+{% endif %}
+</body>
+</html>
