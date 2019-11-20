@@ -7,9 +7,9 @@ class Test(Model):
     name = CharField(max_length=20)
     ages = IntegerField()
 
+"""删去了各个数据模型中的id字段，id就变成了自增的，写上就需要手动添加"""
 
 class User(Model):
-    id = IntegerField(primary_key=True)
     username = CharField(unique=True, max_length=50, blank=False)
     age = SmallIntegerField(default=0)
     phone = BigIntegerField(db_index=True, blank=True, default=0)
@@ -21,17 +21,18 @@ class User(Model):
     class Meta:
         index_together = ['username', 'phone']
 
+    def __str__(self):
+        return 'username:'+self.username
+
 
 class Userprofile(Model):
     """创建一个一对一的实例"""
-    id = IntegerField(primary_key=True)
     user = models.OneToOneField(User, blank=True, null=True, on_delete=models.SET_NULL)
     birthday = CharField(max_length=100, blank=True, default='')
 
 
 class Diary(Model):
     """创建一个一对多的实例"""
-    id = models.IntegerField(primary_key=True)
     user = models.ForeignKey(User, related_name='diary',
                              on_delete=models.SET_NULL,
                              blank=True, null=True)
@@ -42,7 +43,6 @@ class Diary(Model):
 
 class Group(Model):
     """多对多关系的表结构，一个用户在多个组里，一个组里有多个用户"""
-    id = models.IntegerField(primary_key=True)
     user = models.ManyToManyField(User, related_name='group')
     name = models.CharField(max_length=20)
     create_time = IntegerField()
