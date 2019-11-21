@@ -12,6 +12,8 @@ mysqldb = "*"
 sqlalchemy = "*"
 redis = "*"
 django-redis = "*"
+pymongo = "*"
+mongoengine = "*"
 
 [requires]
 python_version = "3.7"
