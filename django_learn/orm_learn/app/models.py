@@ -1,6 +1,27 @@
 # coding:utf-8
+import json
+from functools import wraps
+
 from django.db import models
 from django.db.models import Model,CharField,IntegerField,SmallIntegerField,EmailField,TextField,DateTimeField,BigIntegerField
+from django_redis import get_redis_connection
+
+_cache = get_redis_connection('default')
+
+
+def cache(func):
+    """django中redis的用法"""
+    @wraps(func)
+    def wrapper(obj, *args):
+        key = args[0]
+        value = _cache.get(key)
+        if value:
+            return json.loads(value)
+        rs = func(obj, *args)
+        _cache.set(key, json.dumps(rs))
+        return rs
+    return wrapper
+
 
 
 class Test(Model):
@@ -23,6 +44,20 @@ class User(Model):
 
     def __str__(self):
         return 'username:'+self.username
+
+    @classmethod
+    @cache
+    def get(cls, id):
+        rs = cls.objects.get(id=id)
+        return {
+            'id': rs.id,
+            'username': rs.username,
+            'age': rs.age,
+            'email': rs.email,
+            'info': rs.infl,
+            'create_time': str(rs.create_time),
+            'update_time': str(rs.update_time)
+        }
 
 
 class Userprofile(Model):
