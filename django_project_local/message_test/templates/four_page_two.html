@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>four Page Two</title>
+</head>
+<body>
+    {% for message in messages %}
+        <li style="color:{{ message.message_typ.color }}">
+            {{ message.content }}
+        {{ message.created_time }}
+        </li>
+    {% endfor %}
+</body>
+</html>

@@ -1,5 +1,8 @@
 # coding:utf-8
 from django.db import models
+from .consts import MessageType
+
+import datetime
 
 
 class Message(models.Model):
@@ -10,4 +13,10 @@ class Message(models.Model):
     def __str__(self):
         return 'type:{}, content:{}'.format(self.message_type, self.content)
 
+    @property
+    def message_typ(self):
+        try:
+            return MessageType[self.message_type]
+        except Exception as e:
+            return MessageType.error
 
