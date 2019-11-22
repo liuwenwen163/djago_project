@@ -8,8 +8,10 @@
     <form action="{% url 'regist' %}" method="POST">
         {# 加上csrf_token防止跨站请求攻击 #}
         {% csrf_token %}
-        <label>用户名</label><input type="text" placeholder="用户名" name="username"><br>
-        <label>密码</label><input type="password" placeholder="密码" name="password"><br>
+        {{ form.as_table }}
+
+{#        <label>用户名</label><input type="text" placeholder="用户名" name="username"><br>#}
+{#        <label>密码</label><input type="password" placeholder="密码" name="password"><br>#}
         <input type="submit" value="提交">
     </form>
 </body>
