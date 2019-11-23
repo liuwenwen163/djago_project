@@ -8,10 +8,19 @@
     <form action="{% url 'regist' %}" method="POST">
         {# 加上csrf_token防止跨站请求攻击 #}
         {% csrf_token %}
-        {{ form.as_table }}
+        {% for item in form %}
+{#             for属性规定label标签绑定的表单元素#}
+            <div>
+            <label for="{{ item.id_for_label }}">
+                {{ item.label }}
+            </label>
+                {{ item }}
+{#                 将每一个循环中的错误作为文本展示 #}
+                <p>{{ item.errors.as_text }}</p>
+            </div>
+        {% endfor %}
+        <span>{{ form.non_field_errors.as_text }}</span><br/>
 
-{#        <label>用户名</label><input type="text" placeholder="用户名" name="username"><br>#}
-{#        <label>密码</label><input type="password" placeholder="密码" name="password"><br>#}
         <input type="submit" value="提交">
     </form>
 </body>

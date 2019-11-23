@@ -13,19 +13,19 @@ class Regist(View):
         return render(request, self.TEMPLATE, {'form': form})
 
     def post(self, request):
-        # 这里括号中的username对应前端input标签中的name属性
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
-
         form = Auth(request.POST)
 
         if form.is_valid():
             # cleaned_data 代表经过验证之后，纯正的数据
-            username = form.cleaned_data('username')
-            password = form.cleaned_data('password')
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
 
-        print('username', username)
-        print('password', password)
+            print('username', username)
+            print('password', password)
+        else:
+            # 验证不通过，此时的form携带了non_field_errors，渲染错误消息
+            return render(request, self.TEMPLATE, {'form': form})
+
         return redirect('/regist')
 
 
