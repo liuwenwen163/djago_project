@@ -112,12 +112,3 @@ class AuthModelForm(forms.ModelForm):
 #     #     if len(password) > 8:
 #     #         raise forms.ValidationError('密码不能超过8位')
 
-class A():
-    def __init__(self, x):
-        self.x = x
-
-class B():
-    def __init__(self, x):
-        self.x = x
-    def __str__(self):
-        return 'x value is:{}'.format(self.x)
