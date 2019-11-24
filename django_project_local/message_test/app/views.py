@@ -7,6 +7,7 @@ from django.views.generic import View
 from .consts import MessageType
 
 from .models import Message
+from .forms import MessageForm
 
 
 class LessonThree(View):
@@ -75,3 +76,31 @@ class LessonFourPageTwo(View):
         data['messages'] = messages
 
         return render(request, self.TEMPLATE, data)
+
+
+class LessonFive(View):
+    TEMPLATE = 'five.html'
+
+    def get(self, request):
+        data = {}
+        data['form'] = MessageForm()
+
+        return render(request, self.TEMPLATE, data)
+
+    def post(self, request):
+        form = MessageForm(request.POST)
+
+        # 不通过验证，返回进行渲染错误
+        if not form.is_valid():
+            return render(request, self.TEMPLATE, {'form': form})
+
+        content = form.cleaned_data.get('content')
+        message_type = form.cleaned_data.get('message_type')
+
+        Message.objects.create(
+            content=content,
+            message_type=message_type.value,
+            created_time=time.time()
+        )
+
+        return redirect(reverse('fourpagetwo'))
