@@ -1,4 +1,6 @@
 # coding:utf-8
+import time
+
 from django.db import models
 from .consts import MessageType
 
@@ -20,3 +22,7 @@ class Message(models.Model):
         except Exception as e:
             return MessageType.error
 
+    # 将时间戳转换为人类可阅读的形式
+    def times(self):
+        _time = time.localtime(self.created_time)
+        return time.strftime('%Y-%m-%d %H:%M', _time)
