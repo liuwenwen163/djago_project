@@ -1,5 +1,7 @@
 # coding: utf-8
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
+from django.db.models import Q
+from django.http import Http404
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import login, logout, authenticate
 from django.views.generic import View
@@ -69,4 +71,66 @@ class LogoutUser(View):
     def get(self, request):
         logout(request)
 
-        return redirect(reverse('logout'))
+        return redirect(reverse('login'))
+
+
+class A(View):
+    TEMPLATE = 'a.html'
+    TEMPLATE_ERROR = 'error.html'
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        print(request.user.user_permissions)
+
+        if not request.user.has_perm('app.look_a_page'):
+            print('test')
+            return render(request, self.TEMPLATE_ERROR, {'error': '您无权访问该页'})
+
+        return render(request, self.TEMPLATE)
+
+
+class B(View):
+    TEMPLATE = 'b.html'
+    TEMPLATE_ERROR = 'error.html'
+
+    # def get(self, request):
+    #     """
+    #     两种写法:
+    #     第一种写法:
+    #     下面的 filter 查询验证了组有没有对应的权限
+    #     """
+    #     if not request.user.is_authenticated:
+    #         return redirect('/login')
+    #
+    #     b_permission = Permission.objects.filter(
+    #         codename='look_b_page').first()
+    #     # 在用户的用户权限 或 组权限中看看能否找到对应的权限
+    #     users = User.objects.filter(
+    #         Q(groups__permissions=b_permission) |
+    #         Q(user_permissions=b_permission)
+    #     ).distinct()
+    #
+    #     print(users)
+    #     if request.user not in users:
+    #         raise Http404
+    #
+    #     return render(request, self.TEMPLATE)
+
+
+    from django.utils.decorators import method_decorator
+    from django.contrib.auth.decorators import login_required, permission_required
+
+    @method_decorator(login_required)
+    @method_decorator(permission_required('app.look_b_page'))
+    def get(self, request):
+        """
+        第二种写法:
+        装饰器实现了验证用户有没有登录, 账号是否is_active.
+        用户有无权限,
+        permission这个装饰器会去组和user两个表里都去查找权限
+        优点:方便
+        缺点:验证不通过只能跳转到一个固定的页面
+        """
+        return render(request, self.TEMPLATE)
