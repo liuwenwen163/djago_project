@@ -2,12 +2,69 @@
 # from django.http import HttpResponse
 import time
 
+from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
-from .consts import MessageType
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, permission_required
 
+from .consts import MessageType
 from .models import Message
-from .forms import MessageForm
+from .forms import MessageForm, RegisterForm, LoginForm
+
+
+class Register(View):
+    TEMPLATE = 'register.html'
+
+    def get(self, request):
+        data = {}
+        return render(request, self.TEMPLATE, data)
+
+    def post(self, request):
+        data = {}
+        form = RegisterForm(request.POST)
+        data['error'] = form.non_field_errors # 获取表单整体的错误信息
+
+        if not form.is_valid():
+            return render(request, self.TEMPLATE, data)
+
+        return redirect(reverse('lessonfive'))
+
+
+class LoginView(View):
+    TEMPLATE = 'login.html'
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return redirect(reverse('lessonfive'))
+
+        data = {}
+        # 设置一个next参数，作为hidden元素传入到html页面中
+        next_return = request.GET.get('next', '')
+        data['next'] = next_return
+
+        return render(request, self.TEMPLATE, data)
+
+    def post(self, request):
+        data = {}
+        form = LoginForm(request.POST)
+
+        if not form.is_valid():
+            data['error'] = form.non_field_errors
+            # 获取表单整体的错误信息
+            return render(request, self.TEMPLATE, data)
+
+        user = form.cleaned_data.get('user')
+        if user:
+            login(request, user)
+
+        # 获取到html页面中隐藏元素next_return，知道跳转到哪里
+        next_return = request.POST.get('next_return')
+        if next_return:
+            # 参数存在就跳转到上一个页面，不存在就跳转到最后的默认页面
+            return redirect(next_return)
+
+        return redirect(reverse('lessonfive'))
 
 
 class LessonThree(View):
@@ -64,6 +121,7 @@ class LessonFourPageOne(View):
 class LessonFourPageTwo(View):
     TEMPLATE = 'four_page_two.html'
 
+    @method_decorator(permission_required('app.view_message'))
     def get(self, request):
         data = {}
 
@@ -81,6 +139,7 @@ class LessonFourPageTwo(View):
 class LessonFive(View):
     TEMPLATE = 'five.html'
 
+    @method_decorator(login_required)
     def get(self, request):
         data = {}
         data['form'] = MessageForm()
@@ -97,10 +156,20 @@ class LessonFive(View):
         content = form.cleaned_data.get('content')
         message_type = form.cleaned_data.get('message_type')
 
+        print(request.user.id)
         Message.objects.create(
             content=content,
             message_type=message_type.value,
-            created_time=time.time()
+            created_time=time.time(),
+            user_id=request.user.id
         )
 
         return redirect(reverse('fourpagetwo'))
+
+
+class LogoutUser(View):
+    def get(self, request):
+        logout(request)
+
+        return redirect(reverse('login'))
+

@@ -3,6 +3,8 @@
 import jieba
 
 from django import forms
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 
 from .consts import MessageType, SensitiveWordInit
 
@@ -12,6 +14,63 @@ from .consts import MessageType, SensitiveWordInit
 MESSAGE_TYPE_CHOICES = tuple(
     [(message.value, message.value) for message in MessageType]
 )
+
+
+class RegisterForm(forms.Form):
+    # label信息前端页面已经携带了，所以不需要了
+    username = forms.CharField(widget=forms.TextInput)
+    password = forms.CharField(widget=forms.PasswordInput)
+    check_password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        check_password = self.cleaned_data.get('check_password')
+
+        if not username:
+            raise forms.ValidationError('缺少用户名')
+
+        if not password or not check_password:
+            raise forms.ValidationError('缺少密码')
+
+        if password != check_password:
+            raise forms.ValidationError('两次密码不一致')
+
+        # 验证用户是否存在
+        exists = User.objects.filter(username=username).exists()
+        if exists:
+            raise forms.ValidationError('该用户已存在：{}'.format(username))
+
+        # 创建用户
+        user = User.objects.create_user(username=username, password=password)
+        user.save()
+
+        return self.cleaned_data
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(widget=forms.TextInput)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if not username or not password:
+            raise forms.ValidationError('用户名密码不可为空')
+
+        exists = User.objects.filter(username=username).exists()
+        if not exists:
+            raise forms.ValidationError('该用户不存在')
+
+        user = authenticate(username=username, password=password)
+        if not user:
+            # 如果用户存在密码又不存在，就可以说明密码是错误的
+            raise forms.ValidationError('密码错误')
+
+        self.cleaned_data['user'] = user
+        return self.cleaned_data
+
 
 class MessageForm(forms.Form):
     content = forms.CharField(label='消息内容', max_length=100, required=True)

@@ -1,6 +1,7 @@
 # coding:utf-8
 import time
 
+from django.contrib.auth.models import User
 from django.db import models
 from .consts import MessageType
 
@@ -8,6 +9,13 @@ import datetime
 
 
 class Message(models.Model):
+    user = models.ForeignKey(
+        User,
+        null=True,
+        default='',
+        on_delete=models.SET_NULL,
+        related_name='message'
+    )
     content = models.TextField()
     message_type = models.CharField(max_length=10, db_index=True)
     created_time = models.IntegerField(default=0)

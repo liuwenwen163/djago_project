@@ -19,6 +19,7 @@
     {# 整体的错误信息要放到循环外面，并下hi用下面的格式进行渲染 #}
     <span>{{ form.non_field_errors }}</span>
     <input type="submit" value="提交"/>
+    <a href="{% url 'logout' %}">退出登录</a>
 </form>
 </body>
 </html>
